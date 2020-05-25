@@ -70,4 +70,3 @@ install(TARGETS ffttester
 install(TARGETS ffttest
     EXPORT "${FFT_EXPORT_TARGET}"
 )
-

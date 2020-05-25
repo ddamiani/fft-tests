@@ -17,8 +17,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CUDA_STANDARD 11)
 set(CMAKE_CUDA_STANDARD_REQUIRED True)
 
+# add cmake directory to module path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 # check for the CUDA toolkit
 find_package(CUDAToolkit REQUIRED)
+# check for FFTW
+find_package(FFTW REQUIRED)
 
 # include GNUInstallDir defaults
 include(GNUInstallDirs)
@@ -31,6 +36,8 @@ set(FFT_EXPORT_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${fftTests}")
 # setup rpath for executables
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# have windows automatically export all symbols
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.hh.in config.hh)
 

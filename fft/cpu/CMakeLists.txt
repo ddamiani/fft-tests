@@ -21,10 +21,20 @@ target_include_directories(fftcpu PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/fft/cpu>
 )
 
-# add link to fftw
-target_link_libraries(fftcpu PRIVATE fftw3)
+# add link to fftw3 and fftutils
+target_link_libraries(fftcpu
+    PRIVATE fftutils
+    PUBLIC FFTW::fftw3
+)
 
 install(TARGETS fftcpu
     EXPORT "${FFT_EXPORT_TARGET}"
     PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/fft/cpu"
 )
+
+# install the fttw dlls on windows
+if(WIN32)
+    install(FILES ${FFTW_DLL_FILES}
+        DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    )
+endif()

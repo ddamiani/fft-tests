@@ -1,7 +1,6 @@
 #ifndef _FFT_UTILS_UNITS_HH_
 #define _FFT_UTILS_UNITS_HH_
 
-#include <cmath>
 #include <string>
 
 namespace fft {

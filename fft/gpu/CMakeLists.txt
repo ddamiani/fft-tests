@@ -23,6 +23,7 @@ target_include_directories(fftgpu PUBLIC
 # add link to cuFFT
 target_link_libraries(fftgpu
     PRIVATE
+    fftutils
     CUDA::cudart
     PUBLIC
     CUDA::cufft
