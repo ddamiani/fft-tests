@@ -27,7 +27,7 @@ namespace fft {
     virtual std::string name() const final { return _name; }
     virtual unsigned int parallelization() const { return _parallelization; }
     virtual unsigned int num_points() const { return _npoints; }
-    virtual unsigned int rank() const { return _dims.size(); }
+    virtual int rank() const { return static_cast<int>(_dims.size()); }
     virtual Dimensions dimensions() const { return _dims; }
     virtual unsigned int batches() const { return _batches; }
     virtual bool ready() const = 0;
