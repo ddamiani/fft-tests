@@ -25,7 +25,6 @@ foreach(libname IN ITEMS fftw3 fftw3f fftw3l)
         mark_as_advanced(FFTW_${libname}_DLL) 
     endif()
 endforeach(libname)
-message(STATUS "The values in " ${FFTW_DLL_FILES})
 
 if(WIN32)
     include(FindPackageHandleStandardArgs)
