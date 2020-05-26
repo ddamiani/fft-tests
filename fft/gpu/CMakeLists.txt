@@ -10,7 +10,7 @@ add_library(fftgpu SHARED ${SOURCES})
 set_target_properties(fftgpu PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 # add compile options for the library
-target_compile_options(fftgpu PRIVATE --Werror all-warnings)
+target_compile_options(fftgpu PRIVATE --Werror cross-execution-space-call,deprecated-declarations,reorder)
 
 # add target includes for the library
 target_include_directories(fftgpu PUBLIC
