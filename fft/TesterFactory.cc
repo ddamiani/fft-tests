@@ -4,18 +4,21 @@
 #include <iostream>
 
 using namespace fft;
-using parser::Algorithm;
-using parser::AlgoMap;
-using parser::AlgoName;
 
-Tester* TesterFactory::create(Algorithm type)
+Tester* TesterFactory::create(Algorithm type,
+                              unsigned int parallelization,
+                              unsigned int flags,
+                              bool verbose)
 {
   try {
     switch (type) {
     case Algorithm::fftw:
-      return new cpu::fftwTester(AlgoName(type));
+      return new cpu::fftwTester(AlgoName(type), flags, verbose);
     case Algorithm::cuFFT:
-      return new gpu::cufftTester(AlgoName(type));
+      if (parallelization > 1)
+        return new gpu::cufftXtTester(AlgoName(type), parallelization, flags, verbose);
+      else
+        return new gpu::cufftTester(AlgoName(type), flags, verbose);
     default:
       return nullptr;
     }

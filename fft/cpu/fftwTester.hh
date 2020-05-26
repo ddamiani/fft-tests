@@ -8,29 +8,21 @@ namespace fft {
   namespace cpu {
     class fftwTester : public Tester {
       public:
-        fftwTester(const std::string& name);
+        fftwTester(const std::string& name,
+                   unsigned int flags,
+                   bool verbose=false);
         virtual ~fftwTester();
 
-        virtual unsigned long num_points() const;
-        virtual unsigned int num_dimensions() const;
         virtual bool ready() const;
-
-        virtual void create_plan(unsigned long d1);
-        virtual void create_plan(unsigned long d1, unsigned long d2);
-        virtual void create_plan(unsigned long d1, unsigned long d2, unsigned long d3);
-        virtual bool execute(unsigned long iterations);
-
-        virtual void display(unsigned long maxprint) const;
+        virtual void destroy_plan();
+        virtual bool execute();
+        virtual void display(unsigned int maxprint) const;
 
       protected:
-        void allocate(unsigned long d1);
-        void allocate(unsigned long d1, unsigned long d2);
-        void allocate(unsigned long d1, unsigned long d2, unsigned long d3);
+        virtual bool _allocate();
+        virtual bool _create_plan();
 
       protected:
-        bool          _ready;
-        unsigned int  _ndims;
-        unsigned long _npoints;
         fftw_plan     _plan;
         fftw_complex* _signal;
         fftw_complex* _result;

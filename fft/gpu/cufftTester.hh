@@ -2,44 +2,80 @@
 #define _FFT_GPU_CUFFTTESTER_HH_
 
 #include <fft/Tester.hh>
-#include <cufft.h>
+#include <cufftXt.h>
+#include <vector>
 
 namespace fft {
   namespace gpu {
-    class cufftTester : public Tester {
-      public:
-        cufftTester(const std::string& name);
-        virtual ~cufftTester();
+    class cufftBaseTester : public Tester {
+    public:
+      cufftBaseTester(const std::string& name,
+                      unsigned int parallelization,
+                      unsigned int flags,
+                      bool verbose=false);
+      virtual ~cufftBaseTester();
 
-        virtual unsigned long num_points() const;
-        virtual unsigned int num_dimensions() const;
-        virtual bool ready() const;
-        virtual bool is_remote() const;
+      virtual int ndevices() const;
+      virtual const int* devices() const;
+      virtual int* devices();
+      virtual bool ready() const;
+      virtual bool is_remote() const;
+      virtual void destroy_plan();
+      virtual void display(unsigned int maxprint) const;
 
-        virtual void create_plan(unsigned long d1);
-        virtual void create_plan(unsigned long d1, unsigned long d2);
-        virtual void create_plan(unsigned long d1, unsigned long d2, unsigned long d3);
-        virtual bool send_data();
-        virtual bool execute(unsigned long iterations);
-        virtual bool recv_data();
+    protected:
+      virtual bool _allocate();
+      virtual bool cufft_alloc();
+      virtual bool cufft_host_alloc();
+      virtual bool cufft_device_alloc() = 0;
 
-        virtual void display(unsigned long maxprint) const;
+    protected:
+      cufftHandle         _plan;
+      cufftDoubleComplex* _signal;
+      cufftDoubleComplex* _result;
+    private:
+      std::vector<int>    _devices;
+    };
 
-      protected:
-        bool allocate(unsigned long d1);
-        bool allocate(unsigned long d1, unsigned long d2);
-        bool allocate(unsigned long d1, unsigned long d2, unsigned long d3);
+    class cufftTester : public cufftBaseTester {
+    public:
+      cufftTester(const std::string& name,
+                  unsigned int flags,
+                  bool verbose=false);
+      virtual ~cufftTester();
 
-        bool cufft_alloc();
+      virtual bool send_data();
+      virtual bool execute();
+      virtual bool recv_data();
 
-      protected:
-        bool                _ready;
-        unsigned int        _ndims;
-        unsigned long       _npoints;
-        cufftHandle         _plan;
-        cufftDoubleComplex* _signal;
-        cufftDoubleComplex* _result;
-        cufftDoubleComplex* _dev_data;
+    protected:
+      virtual bool _create_plan();
+      virtual bool cufft_device_alloc();
+
+    protected:
+      cufftDoubleComplex* _dev_data;
+    };
+
+    class cufftXtTester : public cufftBaseTester {
+    public:
+      cufftXtTester(const std::string& name,
+                    unsigned int parallelization,
+                    unsigned int flags,
+                    bool verbose=false);
+      virtual ~cufftXtTester();
+
+      virtual bool send_data();
+      virtual bool execute();
+      virtual bool recv_data();
+
+    protected:
+      virtual bool _set_num_gpu();
+      virtual bool _alloc_needs_plan() const;
+      virtual bool _create_plan();
+      virtual bool cufft_device_alloc();
+
+    protected:
+      cudaLibXtDesc* _dev_data;
     };
   }
 }

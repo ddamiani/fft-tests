@@ -7,7 +7,10 @@
 namespace fft {
   class TesterFactory {
   public:
-    static Tester* create(parser::Algorithm type);
+    static Tester* create(Algorithm type,
+                          unsigned int parallelization,
+                          unsigned int flags,
+                          bool verbose=false);
   };
 }
 

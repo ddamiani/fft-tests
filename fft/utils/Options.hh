@@ -2,44 +2,42 @@
 #define _FFT_UTILS_OPTIONFLAGS_HH_
 
 #include <map>
+#include <vector>
 #include <string>
 
 namespace fft {
-  namespace parser {
-    enum class Flag : unsigned {
-      PinnedMemory = 0,
-      PinnedMemoryMapped = 1,
-    };
+  typedef std::vector<int> Dimensions;
+  typedef std::vector<int>::size_type DimensionSize;
 
-    enum class Algorithm : unsigned {
-      fftw,
-      cuFFT,
-      cuFFTXt,
-    };
+  enum class Flag : unsigned {
+    PinnedMemory = 0,
+    PinnedMemoryMapped = 1,
+  };
 
-    std::string AlgoName(Algorithm algo) {
-      switch (algo) {
-      case Algorithm::fftw:
-        return "fftw";
-      case Algorithm::cuFFT:
-        return "cuFFT";
-      case Algorithm::cuFFTXt:
-        return "cuFFTXt";
-      default:
-        return "";
-      }
+  enum class Algorithm : unsigned {
+    fftw,
+    cuFFT,
+  };
+
+  std::string AlgoName(Algorithm algo) {
+    switch (algo) {
+    case Algorithm::fftw:
+      return "fftw";
+    case Algorithm::cuFFT:
+      return "cuFFT";
+    default:
+      return "";
     }
+  }
 
-    static const std::map<std::string, Algorithm> AlgoMap{
-      {"fftw", Algorithm::fftw},
-      {"cuFFT", Algorithm::cuFFT},
-      {"cuFFTXt", Algorithm::cuFFTXt}
-    };
+  static const std::map<std::string, Algorithm> AlgoMap{
+    {"fftw", Algorithm::fftw},
+    {"cuFFT", Algorithm::cuFFT},
+  };
 
-    std::ostream& operator<<(std::ostream& out, const Algorithm& algo)
-    {
-      return out << AlgoName(algo);
-    }
+  std::ostream& operator<<(std::ostream& out, const Algorithm& algo)
+  {
+    return out << AlgoName(algo);
   }
 }
 

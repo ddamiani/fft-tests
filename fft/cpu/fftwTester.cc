@@ -10,19 +10,21 @@ constexpr int IMAG = 1;
 using namespace fft::cpu;
 using namespace fft::math;
 
-fftwTester::fftwTester(const std::string& name) :
-  Tester(name),
-  _ready(false),
-  _ndims(0),
-  _npoints(0),
+fftwTester::fftwTester(const std::string& name,
+                       unsigned int flags,
+                       bool verbose) :
+  Tester(name, flags, 1, verbose),
+  _plan(nullptr),
   _signal(nullptr),
   _result(nullptr)
 {}
 
 fftwTester::~fftwTester()
 {
-  _ready = false;
-  fftw_destroy_plan(_plan);
+  if (_plan) {
+    fftw_destroy_plan(_plan);
+    _plan = nullptr;
+  }
   fftw_cleanup();
   if (_signal) {
     fftw_free(_signal);
@@ -34,98 +36,70 @@ fftwTester::~fftwTester()
   }
 }
 
-unsigned long fftwTester::num_points() const
-{
-  return _npoints;
-}
-
-unsigned int fftwTester::num_dimensions() const
-{
-  return _ndims;
-}
-
 bool fftwTester::ready() const
 {
-  return _ready;
+  return _plan != nullptr;
 }
 
-void fftwTester::create_plan(unsigned long d1)
+bool fftwTester::_create_plan()
 {
-  _ready = false;
-  // allocate memory
-  allocate(d1);
+  unsigned int npoints = num_points();
+
   // create the plan
-  _plan = fftw_plan_dft_1d(d1, _signal, _result, FFTW_FORWARD, FFTW_ESTIMATE);
-  // set the dims
-  _ndims = 1;
-  _ready = true;
+  _plan = fftw_plan_many_dft(rank(), shape(), batches(),
+                             _signal, NULL, 1, npoints,
+                             _result, NULL, 1, npoints,
+                             FFTW_FORWARD, FFTW_ESTIMATE);
+
+  return _plan != nullptr;
 }
 
-void fftwTester::create_plan(unsigned long d1, unsigned long d2)
+void fftwTester::destroy_plan()
 {
-  _ready = false;
-  // allocate memory
-  allocate(d1, d2);
-  // create the plan
-  _plan = fftw_plan_dft_2d(d1, d2, _signal, _result, FFTW_FORWARD, FFTW_ESTIMATE);
-  // set the dims
-  _ndims = 2;
-  _ready = true;
-}
-
-void fftwTester::create_plan(unsigned long d1, unsigned long d2, unsigned long d3)
-{
-  _ready = false;
-  // allocate memory
-  allocate(d1, d2, d3);
-  // create the plan
-  _plan = fftw_plan_dft_3d(d1, d2, d3, _signal, _result, FFTW_FORWARD, FFTW_ESTIMATE);
-  // set the dims
-  _ndims = 3;
-  _ready = true;
-}
-
-bool fftwTester::execute(unsigned long iterations)
-{
-  for (unsigned long i=0; i<iterations; ++i) {
-    fftw_execute(_plan);
+  if (_plan) {
+    fftw_destroy_plan(_plan);
+    _plan = nullptr;
   }
+}
+
+bool fftwTester::execute()
+{
+  fftw_execute(_plan);
 
   return true;
 }
 
-void fftwTester::display(unsigned long maxprint) const
+void fftwTester::display(unsigned int maxprint) const
 {
-  unsigned long num_points = std::min(_npoints, maxprint);
+  if (verbose()) {
+    unsigned int npoints = std::min(num_points(), maxprint);
 
-  for (unsigned long i = 0; i < num_points; ++i) {
-    std::cout << std::hypot(_result[i][REAL], _result[i][IMAG]) << std::endl;
+    for (unsigned int i = 0; i < npoints; ++i) {
+      std::cout << std::hypot(_result[i][REAL], _result[i][IMAG]) << std::endl;
+    }
   }
 }
 
-void fftwTester::allocate(unsigned long d1)
+bool fftwTester::_allocate()
 {
-  _npoints =  d1;
+  // get size info
+  unsigned int points_per_batch = num_points();
+  unsigned int num_batches = batches();
+  size_t total_points = points_per_batch * num_batches;
 
   // free the signal and result if they already exist
   if (_signal) fftw_free(_signal);
   if (_result) fftw_free(_result);
 
   // allocate memory
-  _signal = fftw_alloc_complex(_npoints);
-  _result = fftw_alloc_complex(_npoints);
+  _signal = fftw_alloc_complex(total_points);
+  _result = fftw_alloc_complex(total_points);
 
-  for (unsigned long i = 0; i < _npoints; ++i) {
-    signal(_signal[i][REAL], _signal[i][IMAG], (double)i / (double)_npoints);
+  for (unsigned int b = 0; b < num_batches; ++b) {
+    for (unsigned int i = points_per_batch * b; i < points_per_batch * (b + 1); ++i) {
+      signal(_signal[i][REAL], _signal[i][IMAG], (double)i / (double)points_per_batch);
+    }
   }
-}
 
-void fftwTester::allocate(unsigned long d1, unsigned long d2)
-{
-  allocate(d1 * d2);
-}
-
-void fftwTester::allocate(unsigned long d1, unsigned long d2, unsigned long d3)
-{
-  allocate(d1 * d2 * d3);
+  return true;
 }
