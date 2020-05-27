@@ -50,7 +50,9 @@ Param(
     [String]
     $Target = "install",
 
-    [Parameter(Mandatory=$false)]                                                                                           [String]                                                                                                                $Prefix = "$pwd\install",
+    [Parameter(Mandatory=$false)]
+    [String]
+    $Prefix = "$pwd\install",
 
     [Parameter(Mandatory=$false, Position=0)]
     [String]
@@ -93,14 +95,14 @@ if ($Clean) {
 # change to the build directory
 Push-Location -Path $DirForBuild
 
-cmake -DCMAKE_INSTALL_PREFIX=$Prefix $PSScriptRoot
+cmake -DCMAKE_INSTALL_PREFIX="$Prefix" "$PSScriptRoot"
 if ($?) {
     if($Install) {
-        cmake --build . --config $BuildType --target $Target
+        cmake --build . --config "$BuildType" --target "$Target"
         # if installing add it to the path
         Add-PathVariable "$Prefix/bin"
     } else {
-        cmake --build . --config $BuildType
+        cmake --build . --config "$BuildType"
     }
 }
 
