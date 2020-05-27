@@ -72,10 +72,11 @@ bool fftwTester::execute()
 void fftwTester::display(unsigned int maxprint) const
 {
   if (verbose()) {
-    unsigned int npoints = std::min(num_points(), maxprint);
+    unsigned int npoints = std::min(num_points() * batches(), maxprint);
 
     for (unsigned int i = 0; i < npoints; ++i) {
-      std::cout << std::hypot(_result[i][REAL], _result[i][IMAG]) << std::endl;
+      std::cout << std::hypot(_signal[i][REAL], _signal[i][IMAG]) << " "
+                << std::hypot(_result[i][REAL], _result[i][IMAG]) << std::endl;
     }
   }
 }

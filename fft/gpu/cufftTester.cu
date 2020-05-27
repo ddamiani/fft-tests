@@ -105,10 +105,11 @@ void cufftBaseTester::destroy_plan()
 void cufftBaseTester::display(unsigned int maxprint) const
 {
   if (verbose()) {
-    unsigned npoints = min(num_points(), maxprint);
+    unsigned npoints = min(num_points() * batches(), maxprint);
 
     for (unsigned int i = 0; i < npoints; ++i) {
-      std::cout << cuCabs(_result[i]) << std::endl;
+      std::cout << cuCabs(_signal[i]) << " "
+                << cuCabs(_result[i]) << std::endl;
     }
   }
 }
@@ -306,7 +307,7 @@ bool cufftXtTester::execute()
 bool cufftXtTester::recv_data()
 {
   size_t size = num_points() * sizeof(cufftDoubleComplex);
-  cufftResult err = cufftXtMemcpy(_plan, _result, _dev_data, CUFFT_COPY_HOST_TO_DEVICE);
+  cufftResult err = cufftXtMemcpy(_plan, _result, _dev_data, CUFFT_COPY_DEVICE_TO_HOST);
   if (err != CUFFT_SUCCESS) {
     printCudaError("cuFFT Error: Problem copying data to host", err);
     return false;
