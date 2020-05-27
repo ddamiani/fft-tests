@@ -353,7 +353,7 @@ bool cufftXtTester::_create_plan()
       return false;
     } else {
       if (verbose()) {
-        std::cout << " *** Created plan with the following work area sizes: ***" << std::endl;
+        std::cout << " *** Created plan with the following work area sizes:" << std::endl;
         for (int i=0; i<ngpus; ++i) {
           Value<double> workSizeConv = convert_bytes<double>(workSize[i]);
           std::cout << "   Work area for gpu " << i << "(" << workSizeConv.unit
