@@ -3,3 +3,4 @@ install/
 setup_env.sh
 setup_env.ps1
 *~
+*.swp
