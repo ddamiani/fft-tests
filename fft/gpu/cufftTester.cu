@@ -343,7 +343,7 @@ bool cufftXtTester::_create_plan()
               << parallelization() << "! ***" << std::endl;
     return false;
   } else {
-    std::vector<size_t> workSize{static_cast<size_t>(ngpus), 0};
+    std::vector<size_t> workSize(static_cast<size_t>(ngpus), 0);
     // create the plan
     cufftResult err = cufftMakePlanMany(_plan, rank(), shape(),
                                         NULL, 1, npoints,
@@ -355,7 +355,7 @@ bool cufftXtTester::_create_plan()
     } else {
       if (verbose()) {
         std::cout << " *** Created plan with the following work area sizes: ***" << std::endl;
-        int dev{0};
+        int dev = 0;
         for (auto val: workSize) {
           Value<double> workSizeConv = convert_bytes<double>(val);
           std::cout << "   Work area size for gpu " << dev++ << ": "
