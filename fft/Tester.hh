@@ -36,14 +36,22 @@ namespace fft {
 
     virtual void create_plan(const Dimensions& dims, unsigned int batches)
     {
+      // destroy old plan
       destroy_plan();
+      // setup the dimensions for the new plan
+      _npoints=1;
+      for (Dimensions::const_iterator it=dims.begin(); it!=dims.end(); ++it)
+        _npoints *= *it;
+      _batches = batches;
+      _dims = dims;
+      // create the plan
       if (_alloc_needs_plan()) {
         if (_create_plan())
-          _alloc(dims, batches);
+          _allocate();
         else
           destroy_plan();
       } else {
-        if (_alloc(dims, batches))
+        if (_allocate())
           if (!_create_plan())
             destroy_plan();
       }
@@ -62,17 +70,6 @@ namespace fft {
     virtual bool _alloc_needs_plan() const { return false; }
     virtual bool _allocate() = 0;
     virtual bool _create_plan() = 0;
-
-  private:
-    virtual bool _alloc(const Dimensions& dims, unsigned int batches)
-    {
-      _npoints=1;
-      for (Dimensions::const_iterator it=dims.begin(); it!=dims.end(); ++it)
-        _npoints *= *it;
-      _batches = batches;
-      _dims = dims;
-      return _allocate();
-    }
 
   private:
     std::string   _name;
