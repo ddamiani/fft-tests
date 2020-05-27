@@ -69,7 +69,6 @@ namespace fft {
       virtual bool recv_data();
 
     protected:
-      virtual bool _set_num_gpu();
       virtual bool _alloc_needs_plan() const;
       virtual bool _create_plan();
       virtual bool cufft_device_alloc();

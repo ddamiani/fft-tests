@@ -5,6 +5,7 @@
 #include <cuda_runtime.h>
 #include <cmath>
 #include <algorithm>
+#include <memory>
 #include <iostream>
 
 using namespace fft::gpu;
@@ -314,27 +315,6 @@ bool cufftXtTester::recv_data()
   }
 }
 
-bool cufftXtTester::_set_num_gpu()
-{
-  int requested_dev = parallelization();
-
-  // check if enough gpus are available
-  if (requested_dev > ndevices()) {
-    std::cerr << " *** Requested number of GPUs (" << requested_dev
-              << ") is higher than number available ("  << ndevices()
-              << ")! ***" << std::endl;
-    return false;
-  }
-
-  cufftResult err = cufftXtSetGPUs(_plan, requested_dev, devices());
-  if (err != CUFFT_SUCCESS) {
-    printCudaError("cuFFT Error: Unable to set the number of GPUs", err);
-    return false;
-  } else {
-    return true;
-  }
-}
-
 bool cufftXtTester::_alloc_needs_plan() const
 {
   return true;
@@ -342,33 +322,43 @@ bool cufftXtTester::_alloc_needs_plan() const
 
 bool cufftXtTester::_create_plan()
 {
-  size_t workSize = 0;
-  unsigned int npoints = num_points();
+  int npoints = num_points();
+  int ngpus = parallelization();
 
   // create and empty plan
   cufftResult err = cufftCreate(&_plan);
   if (err != CUFFT_SUCCESS) {
     printCudaError("cuFFT Error: Unable to create empty plan", err);
     return false;
-  } else if (!_set_num_gpu()) {
+  } else if (ngpus > ndevices()) {
+    std::cerr << " *** Requested number of GPUs (" << ngpus
+              << ") is higher than number available ("  << ndevices()
+              << ")! ***" << std::endl;
+    return false;
+  } else if ((err = cufftXtSetGPUs(_plan, ngpus, devices())) != CUFFT_SUCCESS) {
+    printCudaError("cuFFT Error: Unable to set the number of GPUs", err);
     std::cerr << " *** Failed to set the "
               << "number of GPUs used for the FFT to "
               << parallelization() << "! ***" << std::endl;
     return false;
   } else {
+    std::unique_ptr<size_t[]> workSize(new size_t[ngpus]);
     // create the plan
     cufftResult err = cufftMakePlanMany(_plan, rank(), shape(),
                                         NULL, 1, npoints,
                                         NULL, 1, npoints,
-                                        CUFFT_Z2Z, batches(), &workSize);
+                                        CUFFT_Z2Z, batches(), workSize.get());
     if (err != CUFFT_SUCCESS) {
       printCudaError("cuFFT Error: Unable to create plan", err);
       return false;
     } else {
       if (verbose()) {
-        Value<double> workSizeConv = convert_bytes<double>(workSize);
-        std::cout << " *** Created plan with work area size (" << workSizeConv.unit
-                  << "): " <<  workSizeConv.value << " ***" << std::endl;
+        std::cout << " *** Created plan with the following work area sizes: ***" << std::endl;
+        for (int i=0; i<ngpus; ++i) {
+          Value<double> workSizeConv = convert_bytes<double>(workSize[i]);
+          std::cout << "   Work area for gpu " << i << "(" << workSizeConv.unit
+                    << "): " << workSizeConv.value << std::endl;
+        }
       }
       return true;
     }
