@@ -5,20 +5,27 @@
 
 using namespace fft;
 
-Tester* TesterFactory::create(Algorithm type,
-                              unsigned int parallelization,
-                              unsigned int flags,
-                              bool verbose)
+std::shared_ptr<Tester> TesterFactory::create(Algorithm type,
+                                              unsigned int parallelization,
+                                              unsigned int flags,
+                                              bool verbose)
 {
   try {
     switch (type) {
     case Algorithm::fftw:
-      return new cpu::fftwTester(AlgoName(type), flags, verbose);
+      return std::make_shared<cpu::fftwTester>(AlgoName(type),
+                                               flags,
+                                               verbose);
     case Algorithm::cuFFT:
       if (parallelization > 1)
-        return new gpu::cufftXtTester(AlgoName(type), parallelization, flags, verbose);
+        return std::make_shared<gpu::cufftXtTester>(AlgoName(type),
+                                                    parallelization,
+                                                    flags,
+                                                    verbose);
       else
-        return new gpu::cufftTester(AlgoName(type), flags, verbose);
+        return std::make_shared<gpu::cufftTester>(AlgoName(type),
+                                                  flags,
+                                                  verbose);
     default:
       return nullptr;
     }

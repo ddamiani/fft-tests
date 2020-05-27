@@ -26,7 +26,7 @@ static void showTiming(const char* msg, clock_t begin, clock_t end, bool show=tr
   }
 }
 
-static RetCodes run_fft(Tester* tester, const OptionParser& opts)
+static RetCodes run_fft(std::shared_ptr<Tester> tester, const OptionParser& opts)
 {
   clock_t start, finish, begin, end;
   RetCodes retcode = SUCCESS;
@@ -111,10 +111,10 @@ int main(int argc, char *argv[]) {
 
   start = clock(); // algo start
 
-  Tester* tester = TesterFactory::create(opts.type(),
-                                         opts.parallelization(),
-                                         0,
-                                         opts.verbose());
+  auto tester = TesterFactory::create(opts.type(),
+                                      opts.parallelization(),
+                                      0,
+                                      opts.verbose());
   if (tester) {
     start = clock(); // iterations start
     for (unsigned long i=0; i<opts.iterations(); ++i) {
@@ -134,9 +134,6 @@ int main(int argc, char *argv[]) {
 
     finish = clock(); // iterations end
     showTiming("Total time to complete all iterations", start, finish);
-
-    // cleanup the tester
-    delete tester;
 
     return SUCCESS;
   } else {

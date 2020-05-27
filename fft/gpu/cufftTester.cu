@@ -342,22 +342,23 @@ bool cufftXtTester::_create_plan()
               << parallelization() << "! ***" << std::endl;
     return false;
   } else {
-    std::unique_ptr<size_t[]> workSize(new size_t[ngpus]);
+    std::vector<size_t> workSize{static_cast<size_t>(ngpus), 0};
     // create the plan
     cufftResult err = cufftMakePlanMany(_plan, rank(), shape(),
                                         NULL, 1, npoints,
                                         NULL, 1, npoints,
-                                        CUFFT_Z2Z, batches(), workSize.get());
+                                        CUFFT_Z2Z, batches(), workSize.data());
     if (err != CUFFT_SUCCESS) {
       printCudaError("cuFFT Error: Unable to create plan", err);
       return false;
     } else {
       if (verbose()) {
-        std::cout << " *** Created plan with the following work area sizes:" << std::endl;
-        for (int i=0; i<ngpus; ++i) {
-          Value<double> workSizeConv = convert_bytes<double>(workSize[i]);
-          std::cout << "   Work area for gpu " << i << "(" << workSizeConv.unit
-                    << "): " << workSizeConv.value << std::endl;
+        std::cout << " *** Created plan with the following work area sizes: ***" << std::endl;
+        int dev{0};
+        for (auto val: workSize) {
+          Value<double> workSizeConv = convert_bytes<double>(val);
+          std::cout << "   Work area size for gpu " << dev++ << ": "
+                    << workSizeConv << std::endl;
         }
       }
       return true;

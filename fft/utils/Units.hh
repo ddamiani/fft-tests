@@ -27,6 +27,13 @@ namespace fft {
         return {bytes / GB, "GB"};
       }
     }
+
+    template <typename T>
+    std::ostream &operator<<(std::ostream& out, const Value<T>& val)
+    {
+      out << val.value << " " << val.unit;
+      return out;
+    }
   } // namespace math
 } // namespace fft
 

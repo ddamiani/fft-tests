@@ -3,14 +3,15 @@
 
 #include <fft/Tester.hh>
 #include <fft/utils/Options.hh>
+#include <memory>
 
 namespace fft {
   class TesterFactory {
   public:
-    static Tester* create(Algorithm type,
-                          unsigned int parallelization,
-                          unsigned int flags,
-                          bool verbose=false);
+    static std::shared_ptr<Tester> create(Algorithm type,
+                                          unsigned int parallelization,
+                                          unsigned int flags,
+                                          bool verbose=false);
   };
 }
 
