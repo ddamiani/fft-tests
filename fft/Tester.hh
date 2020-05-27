@@ -6,8 +6,6 @@
 #include <string>
 
 namespace fft {
-  typedef std::vector<unsigned int> Shape;
-
   class Tester {
   public:
     Tester(const std::string& name,
