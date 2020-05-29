@@ -8,7 +8,7 @@
 
 using namespace fft;
 
-enum RetCodes {
+enum class RetCodes : int {
   SUCCESS = 0,
   BAD_ALGO = 1,
   PLAN_FAILURE = 2,
@@ -16,12 +16,34 @@ enum RetCodes {
   EXEC_FAILURE = 4,
 };
 
+static std::ostream& operator<<(std::ostream& out, const RetCodes& val)
+{
+  switch (val) {
+  case RetCodes::SUCCESS:
+    out << "SUCCESS";
+    break;
+  case RetCodes::BAD_ALGO:
+    out << "BAD_ALGO";
+    break;
+  case RetCodes::PLAN_FAILURE:
+    out << "PLAN_FAILURE";
+    break;
+  case RetCodes::MEM_COPY_FAILURE:
+    out << "MEM_COPY_FAILURE";
+    break;
+  case RetCodes::EXEC_FAILURE:
+    out << "EXEC_FAILURE";
+    break;
+  }
+  return out;
+}
+
 static void showTiming(const char* msg, clock_t begin, clock_t end, bool show=true)
 {
   if(show) {
     std::cout << " *** " << msg << ": "
               << std::fixed << std::setprecision(6)
-              << (double)(end - begin) / CLOCKS_PER_SEC
+              << ((double)end - (double)begin) / CLOCKS_PER_SEC
               << " s ***" << std::endl;
   }
 }
@@ -29,7 +51,7 @@ static void showTiming(const char* msg, clock_t begin, clock_t end, bool show=tr
 static RetCodes run_fft(std::shared_ptr<Tester> tester, const OptionParser& opts)
 {
   clock_t start, finish, begin, end;
-  RetCodes retcode = SUCCESS;
+  RetCodes retcode = RetCodes::SUCCESS;
   Dimensions dims = opts.dimensions();
 
   start = clock(); // algo start
@@ -74,19 +96,19 @@ static RetCodes run_fft(std::shared_ptr<Tester> tester, const OptionParser& opts
           showTiming("Time to display results", begin, end, opts.verbose());
         } else {
           std::cerr << " *** Failure copying data to host! ***" << std::endl;
-          retcode = MEM_COPY_FAILURE;
+          retcode = RetCodes::MEM_COPY_FAILURE;
         }
       } else {
         std::cerr << " *** Failure encountered executing plan! ***" << std::endl;
-        retcode = PLAN_FAILURE;
+        retcode = RetCodes::PLAN_FAILURE;
       }
     } else {
       std::cerr << " *** Failure copying data to device! ***" << std::endl;
-      retcode = MEM_COPY_FAILURE;
+      retcode = RetCodes::MEM_COPY_FAILURE;
     }
   } else {
     std::cerr << " *** Failure encountered creating plan! ***" << std::endl;
-    retcode = MEM_COPY_FAILURE;
+    retcode = RetCodes::MEM_COPY_FAILURE;
   }
 
   begin = clock();
@@ -101,6 +123,7 @@ static RetCodes run_fft(std::shared_ptr<Tester> tester, const OptionParser& opts
 
 int main(int argc, char *argv[]) {
   clock_t start, finish;
+  RetCodes retcode = RetCodes::SUCCESS;
 
   OptionParser opts{FFT_NAME " " FFT_VERSION};
   if (opts.parse(argc, argv)) {
@@ -122,11 +145,11 @@ int main(int argc, char *argv[]) {
         std::cout << " *** Starting iteration: " << i << " ***" << std::endl;
       else
         std::cout << " *** Current iteration: " << i << " ***\r" << std::flush;
-      RetCodes retcode = run_fft(tester, opts);
-      if (retcode != SUCCESS) {
+      retcode = run_fft(tester, opts);
+      if (retcode != RetCodes::SUCCESS) {
         std::cerr << " *** Iteration " << i << " failed with return code: "
                   << retcode << " ***" << std::endl;
-        return retcode;
+        break;
       }
       if (opts.verbose())
         std::cout << " *** Finished iteration: " << i << " ***" << std::endl;
@@ -135,9 +158,10 @@ int main(int argc, char *argv[]) {
     finish = clock(); // iterations end
     showTiming("Total time to complete all iterations", start, finish);
 
-    return SUCCESS;
   } else {
     std::cerr << "Unsupported fft algorithm type: " << opts.type() << std::endl;
-    return BAD_ALGO;
+    retcode = RetCodes::BAD_ALGO;
   }
+
+  return static_cast<int>(retcode);
 }
