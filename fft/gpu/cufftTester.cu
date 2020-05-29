@@ -105,7 +105,7 @@ void cufftBaseTester::destroy_plan()
 void cufftBaseTester::display(unsigned int maxprint) const
 {
   if (verbose()) {
-    unsigned npoints = min(num_points() * batches(), maxprint);
+    unsigned npoints = std::min(num_points() * batches(), maxprint);
 
     for (unsigned int i = 0; i < npoints; ++i) {
       std::cout << cuCabs(_signal[i]) << " "

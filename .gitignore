@@ -1,6 +1,10 @@
 build/
 install/
+external/
 setup_env.sh
 setup_env.ps1
 *~
 *.swp
+# visual studio
+.vs/
+CMakeSettings.json

@@ -84,8 +84,8 @@ void fftwTester::display(unsigned int maxprint) const
 bool fftwTester::_allocate()
 {
   // get size info
-  unsigned int points_per_batch = num_points();
-  unsigned int num_batches = batches();
+  size_t points_per_batch = num_points();
+  size_t num_batches = batches();
   size_t total_points = points_per_batch * num_batches;
 
   // free the signal and result if they already exist
@@ -96,8 +96,8 @@ bool fftwTester::_allocate()
   _signal = fftw_alloc_complex(total_points);
   _result = fftw_alloc_complex(total_points);
 
-  for (unsigned int b = 0; b < num_batches; ++b) {
-    for (unsigned int i = points_per_batch * b; i < points_per_batch * (b + 1); ++i) {
+  for (size_t b = 0; b < num_batches; ++b) {
+    for (size_t i = points_per_batch * b; i < points_per_batch * (b + 1); ++i) {
       signal(_signal[i][REAL], _signal[i][IMAG], (double)i / (double)points_per_batch);
     }
   }
