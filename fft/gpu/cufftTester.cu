@@ -39,10 +39,7 @@ cufftBaseTester::cufftBaseTester(const std::string& name,
                     << "   Device Number:                " << device << std::endl
                     << "   Device Name:                  " << prop.name << std::endl
                     << "   Compute Capability:           " << prop.major << "." << prop.minor << std::endl
-                    << "   Memory Clock Rate (KHz):      " << prop.memoryClockRate << std::endl
                     << "   Memory Bus Width (bits):      " << prop.memoryBusWidth << std::endl
-                    << "   Peak Memory Bandwidth (GB/s): "
-                    << 2.0*prop.memoryClockRate*(prop.memoryBusWidth/8)/1.0e6 << std::endl
                     << "   Total Constant Memory (KB):   " << prop.totalConstMem/1024.0 << std::endl
                     << "   Total Global Memory (GB):     " << prop.totalGlobalMem/pow(1024, 3)
                     << std::endl;

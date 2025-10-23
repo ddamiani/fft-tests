@@ -6,8 +6,8 @@ list(FILTER HEADERS EXCLUDE REGEX "Cuda.*.hh$")
 # add the library
 add_library(fftgpu SHARED ${SOURCES})
 
-# add public headers for the library
-set_target_properties(fftgpu PROPERTIES PUBLIC_HEADER "${HEADERS}")
+# add public headers and cuda arch for the library
+set_target_properties(fftgpu PROPERTIES PUBLIC_HEADER "${HEADERS}" CUDA_ARCHITECTURES native)
 
 # add compile options for the library
 target_compile_options(fftgpu PRIVATE --Werror cross-execution-space-call,deprecated-declarations,reorder)

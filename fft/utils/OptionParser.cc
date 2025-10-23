@@ -45,14 +45,14 @@ bool OptionParser::parse(int argc, char *argv[])
   CLI::App app{_description};
 
   /* options */
-  app.add_option("-i,--iterations", _iterations, "the number of iterations of the fft to run", true)
+  app.add_option("-i,--iterations", _iterations, "the number of iterations of the fft to run")
     ->check(CLI::PositiveNumber);
-  app.add_option("-b,--batches",  _batches, "the number of batches to run in the fft", true)
+  app.add_option("-b,--batches",  _batches, "the number of batches to run in the fft")
     ->check(CLI::PositiveNumber);
-  app.add_option("-m,--maxprint", _maxprint, "the maximum number of points of the output to print", true);
-  app.add_option("-t,--type", _type, "the type of the fft to run (e.g. fftw, cuFFT, etc)", true)
+  app.add_option("-m,--maxprint", _maxprint, "the maximum number of points of the output to print");
+  app.add_option("-t,--type", _type, "the type of the fft to run (e.g. fftw, cuFFT, etc)")
     ->transform(CLI::CheckedTransformer(AlgoMap));
-  app.add_option("-p,--parallel", _parallelization, "the number of parallel tasks to use", true)
+  app.add_option("-p,--parallel", _parallelization, "the number of parallel tasks to use")
     ->check(CLI::Range(1,16));
   /* positionals */
   app.add_option("npoints", _dimensions, "the number of points for each dimension as list")
